@@ -11,10 +11,11 @@
         - vars/main_vars.yml
 
     handlers:
-    - name: restart smb
-      ansible.builtin.service:
-        name: smb
-        state: restarted
+  - name: Restart Samba services
+    service:
+      name: "{{ item }}"
+      state: restarted
+    with_items: "{{ samba_services }}"
 
     tasks:
     - import_tasks: tasks/setupZFStask.yml

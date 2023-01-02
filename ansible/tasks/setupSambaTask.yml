@@ -1,21 +1,45 @@
 ---
-- name: Install generic needed packages
+- name: Install needed packages
   dnf:
     name:
     - samba
     - samba-client
     - samba-common
-    state: latest
-
-- name: Start samba service, if not started
-  ansible.builtin.service:
-    name: smb
+    state: present
+  tags: samba
+- name: Register Samba version
+  shell: >
+    set -o nounset -o pipefail -o errexit &&
+    smbd --version | sed 's/Version //'
+  args:
+    executable: /bin/bash
+  register: samba_version
+  changed_when: false
+  tags: samba
+  - name: Install SELinux package
+  package:
+    name: "{{ samba_selinux_packages }}"
+    state: present
+  when: ansible_selinux is defined and ansible_selinux.status == 'enabled'
+  tags: samba
+- name: Make sure SELinux boolean settings are correct
+  seboolean:
+    name: "{{ item }}"
+    state: true
+    persistent: true
+  with_items: "{{ samba_selinux_booleans }}"
+  when: ansible_selinux is defined and ansible_selinux.status == 'enabled'
+  tags: samba
+- name: Start Samba service(s)
+  service:
+    name: "{{ item }}"
     state: started
-
+    enabled: true
+  with_items: "{{ samba_services }}"
+  tags: samba
 - name: Create/update samba users
   include_tasks: "smbusers.yml"
   loop: "{{users}}"
-
 - name: Configuring samba shares
   template:
     src: homeserver_smb.conf

@@ -22,6 +22,11 @@
 - name: Remove packates not needed anymore
   dnf:
     autoremove: yes
+- name: Install SELinux package
+  package:
+    name: "{{ python3_docker }}"
+    state: present
+  tags: samba
 - name: Add Docker repo
   get_url:
     url: https://download.docker.com/linux/centos/docker-ce.repo
@@ -45,18 +50,11 @@
     groups: docker
     append: 'yes'
 
-- name: Download docker-compose
+- name: Install docker-compose from official github repo
   get_url:
-    url: >-
-      https://github.com/docker/compose/releases/download/{{docker_compose_version}}/docker-compose-Linux-x86_64
-    dest: ~/docker-compose
-    mode: +x
-- name: Check docker-compose exists
-  stat: path=~/docker-compose
-  register: docker_compose
-- name: Move docker-compose to /usr/local/bin/docker-compose
-  command: mv ~/docker-compose /usr/local/bin/docker-compose
-  when: docker-compose.stat.exists
+    url : https://github.com/docker/compose/releases/download/v2.14.2/docker-compose-Linux-x86_64
+    dest: /usr/local/bin/docker-compose
+    mode: 'u+x,g+x'
 - name: create docker-compose symbolic link
   file:
     src: /usr/local/bin/docker-compose
