@@ -1,7 +1,13 @@
-# File: roles/samba/handlers/main.yml
 ---
-- name: Restart Samba services
+# handlers file for ansible-samba
+- name: restart nmbd
   service:
-    name: "{{ item }}"
+    name: nmbd
     state: restarted
-  with_items: "{{ samba_services }}"
+  become: true
+- name: restart smbd
+  service:
+    name: smbd
+    state: restarted
+  become: true
+

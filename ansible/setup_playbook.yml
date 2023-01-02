@@ -8,13 +8,7 @@
     become_user: root
 
     vars_files:
-        - vars/main_vars.yml
-    handlers:
-      - name: Restart Samba services
-      service:
-        name: "{{ item }}"
-        state: restarted
-        with_items: "{{ samba_services }}"
+      - vars/main_vars.yml
     tasks:
       - import_tasks: tasks/setupZFStask.yml
       - import_tasks: tasks/setupUsersTask.yml
