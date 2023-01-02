@@ -1,15 +1,15 @@
 ---
 - name: Install generic needed packages
-  apt:
+  dnf:
     name:
     - samba
-    - samba-vfs-modules
+    - samba-client
+    - samba-common
     state: latest
-    cache_valid_time: 3600
 
 - name: Start samba service, if not started
   ansible.builtin.service:
-    name: smbd
+    name: smb
     state: started
 
 - name: Create/update samba users
@@ -24,4 +24,4 @@
     group: root
     mode: 0644
   notify:
-    - restart smbd
+    - restart smb

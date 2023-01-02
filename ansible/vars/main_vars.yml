@@ -28,10 +28,8 @@ shared_folders:
 
 shared_folders_group: family
 
-domain_name: example.com
-
 docker: {
-  external_network: traefik_proxy,
+  external_network: net_proxy,
   data_dir: '/{{zfs.poolName}}/docker/data',
   # data for docker env
   PUID: '1000',
