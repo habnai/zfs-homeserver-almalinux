@@ -23,10 +23,9 @@
   dnf:
     autoremove: yes
 - name: Install SELinux package
-  package:
-    name: "{{ python3_docker }}"
+  dnf:
+    name: python3-docker
     state: present
-  tags: samba
 - name: Add Docker repo
   get_url:
     url: https://download.docker.com/linux/centos/docker-ce.repo

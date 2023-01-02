@@ -11,8 +11,6 @@ zfs: {
 usergroups:
   - family
   - admins
-docker_python:
-  - python3-docker
 samba_selinux_packages:
   - python3-libsemanage
 samba_selinux_booleans:
