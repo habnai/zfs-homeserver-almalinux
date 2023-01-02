@@ -4,45 +4,69 @@
     src: templates/dockerEnv.env
     dest: "../.env"
 
-- name: Install the needed docker packages
-  apt:
-    name:
-    - docker
-    - docker-compose
+- name: Install dnf utils
+  dnf:
+    name: dnf-utils
     state: latest
-    cache_valid_time: 3600
-
+- name: Install device-mapper-persistent-data
+  dnf:
+    name: device-mapper-persistent-data
+    state: latest
+- name: Update all installed packages using DNF module
+  dnf:
+    name: '*'
+    state: latest
+    update_cache: yes
+    update_only: yes
+  register: dnf_update_status
+- name: Remove packates not needed anymore
+  dnf:
+    autoremove: yes
+- name: Add Docker repo
+  get_url:
+    url: https://download.docker.com/linux/centos/docker-ce.repo
+    dest: /etc/yum.repos.d/docker-ce.repo
+- name: Install Docker
+  package:
+     name: docker-ce
+     state: latest
 - name: Ensure docker group exists
   group:
     name: docker
     state: present
-
-- name: Add user {{adminuser}} to docker group
+- name: Start Docker service
+  service:
+    name: docker
+    state: started
+    enabled: yes
+- name: 'Add user {{adminuser}} to docker group'
   user:
-    name: "{{adminuser}}"
+    name: '{{adminuser}}'
     groups: docker
-    append: yes
+    append: 'yes'
+
+- name: Download docker-compose
+  get_url:
+    url: >-
+      https://github.com/docker/compose/releases/download/{{docker_compose_version}}/docker-compose-Linux-x86_64
+    dest: ~/docker-compose
+    mode: +x
+- name: Check docker-compose exists
+  stat: path=~/docker-compose
+  register: docker_compose
+- name: Move docker-compose to /usr/local/bin/docker-compose
+  command: mv ~/docker-compose /usr/local/bin/docker-compose
+  when: docker-compose.stat.exists
+- name: create docker-compose symbolic link
+  file:
+    src: /usr/local/bin/docker-compose
+    dest: /usr/bin/docker-compose
+    state: link
 
 - name: Create folder for docker data
   file:
     path: "{{docker.data_dir}}"
     state: directory
-
-- name: Create folder for traefik data
-  file:
-    path: "{{docker.data_dir}}/traefik/acme"
-    state: directory
-
-- name: Create acme config file for traefik
-  file:
-    path: "{{docker.data_dir}}/traefik/acme/acme.json"
-    state: touch
-    mode: '0600'
-
-- name: Copy treafik config file
-  template:
-    src: templates/traefik.toml
-    dest: "{{docker.data_dir}}/traefik/traefik.toml"
 
 - name: Create the external docker network {{docker.external_network}}
   docker_network:
