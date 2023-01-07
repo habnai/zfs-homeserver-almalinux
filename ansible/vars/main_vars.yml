@@ -11,11 +11,6 @@ zfs: {
 usergroups:
   - family
   - admins
-samba_selinux_packages:
-  - python3-libsemanage
-samba_selinux_booleans:
-  - samba_enable_home_dirs
-  - samba_export_all_rw
 samba_services:
   - smb
   - nmb
