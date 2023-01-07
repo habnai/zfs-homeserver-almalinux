@@ -9,11 +9,11 @@
   apt: upgrade=dist
 - name: Add an apt signing key for Docker
   apt_key:
-    url: 'https://download.docker.com/linux/debian/gpg'
+    url: 'https://download.docker.com/linux/ubuntu/gpg'
     state: present
 - name: Add apt repository for stable version
   apt_repository:
-    repo: 'deb [arch=amd64] https://download.docker.com/linux/debian buster stable'
+    repo: 'deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"'
     state: present
 - name: Install Docker
   package:
@@ -28,9 +28,9 @@
     name: docker
     state: started
     enabled: yes
-- name: 'Add user {{adminuser}} to docker group'
+- name: 'Add user {{ adminuser }} to docker group'
   user:
-    name: '{{adminuser}}'
+    name: '{{ adminuser }}'
     groups: docker
     append: 'yes'
 
@@ -47,9 +47,6 @@
 
 - name: Create folder for docker data
   file:
-    path: "{{docker.data_dir}}"
+    path: "{{ docker.data_dir }}"
     state: directory
 
-- name: Create the external docker network {{docker.external_network}}
-  docker_network:
-    name: "{{docker.external_network}}"

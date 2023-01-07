@@ -12,8 +12,8 @@ usergroups:
   - family
   - admins
 samba_services:
-  - smb
-  - nmb
+  - smbd
+  - nmbd
 users:
   - {name: 'mainuser', groups: 'family, admins', smbpasswd: 'mainuser'}
   - {name: 'otheruser', groups: 'family', smbpasswd: 'otheruser'}
