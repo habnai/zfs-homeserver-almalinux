@@ -14,3 +14,5 @@
       - import_tasks: tasks/setupUsersTask.yml
       - import_tasks: tasks/setupSambaTask.yml
       - import_tasks: tasks/setupDocker.yml
+      # Install and configure UFW
+      - import_tasks: ufw.yml

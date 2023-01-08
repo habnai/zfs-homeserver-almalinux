@@ -4,7 +4,7 @@
     src: templates/dockerEnv.env
     dest: "../.env"
 - name: Update apt cache
-  apt: update_cache=yes cache_valid_time=3600
+  apt: update_cache=yes
 - name: Upgrade all apt packages
   apt: upgrade=dist
 - name: Add an apt signing key for Docker

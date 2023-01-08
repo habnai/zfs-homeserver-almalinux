@@ -9,11 +9,11 @@ This is supposed to be a very simple way for everyone to set up their own server
 This setup will
 - automatically install itself via Ansible with minimal setup needed (details in the [Ansible post here](https://thesmarthomejourney.com/2021/09/06/home-server-basics-ansible/))
 - pool a set of drives with ZFS providing a secure storage with buildin versioning
-  - uses RAID Z (similar to RAID 5) by default but you can change it to your liking  
+  - uses RAID Z (similar to RAID 5) by default but you can change it to your liking
   - includes a backup solution vis ZFS snapshots
   - scripts for [checking the backups](https://thesmarthomejourney.com/2021/10/17/automatic-backup-check-zfs/) and the [pool health](https://thesmarthomejourney.com/2022/02/07/zfs-alert-via-pushover/)
   - more details in my blog [post on ZFS backups](https://thesmarthomejourney.com/2021/09/12/home-server-zfs-backup/)
-- make the storage available for the local network via samba shares 
+- make the storage available for the local network via samba shares
   - including support for Windows "shadow copies" via the snapshots
   - including different users with private personal folders & shared folders
 - run any software you want in a Docker container via docker-compose to make it available in the local network
@@ -24,7 +24,7 @@ This setup will
   - simple to configure [(detailed guide here)](https://thesmarthomejourney.com/2021/11/08/traefik-1-reverse-proxy-setup/)
 
 ## Prerequisites
-You need some hardware to run this on. I provide some more details [in my blog post here](https://thesmarthomejourney.com/2021/09/06/home-server-basics-ansible/) but I recommend some mid class PC hardware optimized for low energy usage and long runtimes. A Raspberry Pi might work but it a bit underpowered and makes it complicated to connect multiple drives. 
+You need some hardware to run this on. I provide some more details [in my blog post here](https://thesmarthomejourney.com/2021/09/06/home-server-basics-ansible/) but I recommend some mid class PC hardware optimized for low energy usage and long runtimes. A Raspberry Pi might work but it a bit underpowered and makes it complicated to connect multiple drives.
 
 You will also need a set of drives big enough for your storage needs (times x if you want to use a RAID setup) and some additional storage for the system itself. Again more details on this in the blog post. As the operating system I recommend a free version of Linux (I used Ubuntu server).
 
@@ -38,9 +38,9 @@ Installation is supposed to be quick and easy if you are looking for a similar s
 First install your favorite Linux and connect the drives. During installation you can enable SSH and do the rest of the setup remotely.
 ```
 sudo apt install git ansible
-git clone https://github.com/OliverHi/zfs-homeserver.git
+git clone https://github.com/habnai/zfs-homeserver.git
 cd zfs-homeserver/ansible
-// udpate the variables in the ./vars/main_vars.yml file to your liking 
+// udpate the variables in the ./vars/main_vars.yml file to your liking
 ansible-playbook setup_playbook.yml -K
 ```
 Now update the .env to your liking and start your services.
