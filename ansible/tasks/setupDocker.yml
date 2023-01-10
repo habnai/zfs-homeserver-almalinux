@@ -3,18 +3,32 @@
   template:
     src: templates/dockerEnv.env
     dest: "../.env"
-- name: Update apt cache
-  apt: update_cache=yes
-- name: Upgrade all apt packages
-  apt: upgrade=dist
-- name: Add an apt signing key for Docker
-  apt_key:
-    url: 'https://download.docker.com/linux/ubuntu/gpg'
+- name: Install dnf utils
+  dnf:
+    name: dnf-utils
+    state: latest
+- name: Install device-mapper-persistent-data
+  dnf:
+    name: device-mapper-persistent-data
+    state: latest
+- name: Update all installed packages using DNF module
+  dnf:
+    name: '*'
+    state: latest
+    update_cache: yes
+    update_only: yes
+  register: dnf_update_status
+- name: Remove packates not needed anymore
+  dnf:
+    autoremove: yes
+- name: Install SELinux package
+  dnf:
+    name: python3-docker
     state: present
-- name: Add apt repository for stable version
-  apt_repository:
-    repo: 'deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"'
-    state: present
+- name: Add Docker repo
+  get_url:
+    url: https://download.docker.com/linux/centos/docker-ce.repo
+    dest: /etc/yum.repos.d/docker-ce.repo
 - name: Install Docker
   package:
      name: docker-ce

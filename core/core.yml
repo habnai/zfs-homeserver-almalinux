@@ -1,56 +1,103 @@
-version: "3.3"
-
+version: "3.9"
 networks:
-  traefik_proxy:
-    external:
-      name: traefik_proxy
+  net_proxy:
+    name: net_proxy
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.90.0/24
   default:
     driver: bridge
+  socket_proxy:
+    name: socket_proxy
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.91.0/24
 
-
-  whoami:
-    image: containous/whoami
-    container_name: whoami
-    restart: unless-stopped
+services:
+  socket-proxy:
+    container_name: socket-proxy
+    image: tecnativa/docker-socket-proxy
+    restart: always
     networks:
-      #- default
-      - traefik_proxy
-    labels:
-      - "traefik.enable=false"
-      - "traefik.backend=whoami"
-      - "traefik.frontend.rule=Host:whoami.${DOMAINNAME}"
-      - "traefik.docker.network=traefik_proxy"
-
-  heimdall:
-    image: linuxserver/heimdall
-    container_name: heimdall
-    restart: unless-stopped
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-    volumes:
-      - ${DATADIR}/heimdall:/config
+      socket_proxy:
+        ipv4_address: 192.168.91.254
+    security_opt:
+     - no-new-privileges:true
+    #privileged: true # true for VM. False for unprivileged LXC container.
     ports:
-      - 9080:80
-      - 9443:443
-    networks:
-      - default
-      - traefik_proxy
-    labels:
-      - "traefik.enable=false"
-      - "traefik.backend=heimdall"
-      - "traefik.port=80"
-      - "traefik.frontend.rule=Host:heimdall.${DOMAINNAME}"
-      - "traefik.docker.network=traefik_proxy"
-
-  watchtower:
+     - "127.0.0.1:2375:2375" # Port 2375 should only ever get exposed to the internal network. When possible use this line.
+    # I use the next line instead, as I want portainer to manage multiple docker endpoints within my home network.
+    #  - "2375:2375"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    environment:
+      - LOG_LEVEL=info # debug,info,notice,warning,err,crit,alert,emerg
+      ## Variables match the URL prefix (i.e. AUTH blocks access to /auth/* parts of the API, etc.).
+      # 0 to revoke access.
+      # 1 to grant access.
+      ## Granted by Default
+      - EVENTS=1
+      - PING=1
+      - VERSION=1
+      ## Revoked by Default
+      # Security critical
+      - AUTH=0
+      - SECRETS=0
+      - POST=1 # Watchtower
+      # Not always needed
+      - BUILD=0
+      - COMMIT=0
+      - CONFIGS=0
+      - CONTAINERS=1 # Traefik, portainer, etc.
+      - DISTRIBUTION=0
+      - EXEC=0
+      - IMAGES=1 # Portainer
+      - INFO=1 # Portainer
+      - NETWORKS=1 # Portainer
+      - NODES=0
+      - PLUGINS=0
+      - SERVICES=1 # Portainer
+      - SESSION=0
+      - SWARM=0
+      - SYSTEM=0
+      - TASKS=1 # Portainer
+      - VOLUMES=1 # Portainer
+  watchtower: #automatic container version monitoring and updating
     container_name: watchtower
     image: containrrr/watchtower
+    restart: unless-stopped
+    environment:
+       TZ: ${TZ}
+       DEBUG: "true"
+       WATCHTOWER_CLEANUP: "true"
+       WATCHTOWER_REVIVE_STOPPED: "false"
+       WATCHTOWER_INCLUDE_STOPPED: "true"
+       WATCHTOWER_SCHEDULE: 0 0 2 * * *
+       DOCKER_HOST: tcp://socket-proxy:2375
+      #- WATCHTOWER_NOTIFICATIONS=shoutrrr
+      #- WATCHTOWER_NOTIFICATION_URL=pushover://shoutrrr:$PUSHAPI@$PUSHKEY/?devices=$PUSHDEVICE
+    restart: unless-stopped
+    command: # add or remove the below as required
+      - watchtower
+    networks:
+      - net_proxy
+      - socket_proxy
+  portainer:
+    container_name: portainer
+    image: portainer/portainer-ce:latest
+    # command: -H unix:///var/run/docker.sock # # Use Docker Socket Proxy instead for improved security
+    command: -H tcp://socket-proxy:2375
+    security_opt:
+      - no-new-privileges:true
+    restart: always
+    networks:
+       - net_proxy
+       - socket_proxy
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+       - ${DATADIR}/portainer/data:/data
     environment:
       - TZ=${TZ}
-      - WATCHTOWER_CLEANUP=true
-      - WATCHTOWER_NOTIFICATIONS=shoutrrr
-      - WATCHTOWER_NOTIFICATION_URL=pushover://shoutrrr:${PO_TOKEN}@${PO_USERKEY}
+    ports:
+       - 9000:9000
