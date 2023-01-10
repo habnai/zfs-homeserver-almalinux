@@ -1,4 +1,4 @@
-# zfs-homeserver
+# zfs-homeserver-almalinux
 A full server for your home using ZFS, Docker &amp; Ansible for setup.
 This is supposed to be a very simple way for everyone to set up their own server at home.
 
@@ -38,7 +38,7 @@ Installation is supposed to be quick and easy if you are looking for a similar s
 First install your favorite Linux and connect the drives. During installation you can enable SSH and do the rest of the setup remotely.
 ```
 sudo apt install git ansible
-git clone https://github.com/habnai/zfs-homeserver.git
+git clone https://github.com/habnai/zfs-homeserver-almalinux.git
 cd zfs-homeserver/ansible
 // udpate the variables in the ./vars/main_vars.yml file to your liking
 ansible-playbook setup_playbook.yml -K
