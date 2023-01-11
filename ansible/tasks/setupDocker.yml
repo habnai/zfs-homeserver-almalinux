@@ -3,10 +3,6 @@
   template:
     src: templates/dockerEnv.env
     dest: "../.env"
-- name: Install dnf utils
-  dnf:
-    name: dnf-utils
-    state: latest
 - name: Install device-mapper-persistent-data
   dnf:
     name: device-mapper-persistent-data
