@@ -6,7 +6,11 @@
     # become root user, which is needed for most tasks
     become: yes
     become_user: root
-
+    handlers:
+    - name: restart smb
+      ansible.builtin.service:
+        name: smb
+        state: restarteds
     vars_files:
       - vars/main_vars.yml
     tasks:
