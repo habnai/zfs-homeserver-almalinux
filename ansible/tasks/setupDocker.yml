@@ -60,3 +60,9 @@
     path: "{{ docker.data_dir }}"
     state: directory
 
+- name: Create folder for secret data
+  file:
+    path: "{{ docker.data_dir }}"/secrets
+    state: directory
+    mode: '0600'
+

@@ -1,6 +1,6 @@
 ---
 - name: Install needed packages
-  apt:
+  dnf:
     name:
       - samba
       - samba-client
